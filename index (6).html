@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LZXBI 人格测试</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+            background: #f2f2f7;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #111;
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* COVER */
+        #cover {
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+        }
+
+        .cover-card {
+            background: white;
+            border-radius: 28px;
+            padding: 52px 32px 40px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+        }
+
+        .cover-title {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .cover-sub {
+            font-size: 15px;
+            color: #888;
+            margin-bottom: 32px;
+            letter-spacing: 0.5px;
+        }
+
+        .cover-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 36px;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 18px;
+            background: #111;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-start:active {
+            opacity: 0.85;
+            transform: scale(0.98);
+        }
+
+        .cover-note {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #aaa;
+            letter-spacing: 0.5px;
+        }
+
+        /* QUIZ */
+        #quiz {
+            background: #f2f2f7;
+        }
+
+        .quiz-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #f2f2f7;
+            padding: 16px 20px 10px;
+        }
+
+        .progress-track {
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #111;
+            border-radius: 2px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .quiz-counter {
+            font-size: 12px;
+            color: #999;
+            text-align: right;
+            margin-top: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .quiz-body {
+            flex: 1;
+            padding: 16px 20px 40px;
+            overflow-y: auto;
+        }
+
+        .q-num {
+            width: 30px;
+            height: 30px;
+            background: #111;
+            color: white;
+            border-radius: 50%;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .q-text {
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.55;
+            margin-bottom: 20px;
+            letter-spacing: 0.2px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .opt {
+            background: white;
+            border: none;
+            border-radius: 16px;
+            padding: 17px 20px;
+            font-size: 15px;
+            color: #222;
+            text-align: left;
+            width: 100%;
+            cursor: pointer;
+            line-height: 1.45;
+            transition: all 0.15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .opt:active {
+            transform: scale(0.985);
+        }
+
+        .opt.selected {
+            background: #111;
+            color: white;
+        }
+        /* RESULT */
+        #result {
+            align-items: center;
+            justify-content: flex-start;
+            padding: 60px 24px 40px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 28px;
+            padding: 44px 28px 36px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+        }
+
+        .result-emoji {
+            font-size: 52px;
+            margin-bottom: 6px;
+        }
+
+        .result-label {
+            font-size: 13px;
+            color: #aaa;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .result-type {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .result-pheromone {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .result-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f7f7f7;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: #555;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .result-divider {
+            height: 1px;
+            background: #f0f0f0;
+            margin-bottom: 22px;
+        }
+
+        .result-desc {
+            font-size: 16px;
+            line-height: 1.75;
+            color: #333;
+            text-align: left;
+            margin-bottom: 28px;
+            letter-spacing: 0.2px;
+        }
+
+        .result-quote-block {
+            border-left: 3px solid #ddd;
+            padding: 4px 16px;
+            text-align: left;
+            margin-bottom: 32px;
+        }
+
+        .result-quote {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.7;
+            font-style: italic;
+            margin-bottom: 6px;
+        }
+
+        .result-quote-author {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .btn-retry {
+            width: 100%;
+            padding: 16px;
+            border: 1.5px solid #ddd;
+            background: white;
+            border-radius: 50px;
+            font-size: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-retry:active {
+            background: #f5f5f5;
+        }
+
+        .percent-bar {
+            background: #f0f0f0;
+            border-radius: 6px;
+            height: 6px;
+            margin: 4px 0 18px;
+            overflow: hidden;
+        }
+
+        .percent-fill {
+            height: 100%;
+            background: #111;
+            border-radius: 6px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .percent-label {
+            font-size: 12px;
+            color: #999;
+            text-align: right;
+            margin-bottom: 2px;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COVER -->
+    <div class="screen active" id="cover">
+        <div class="cover-card">
+            <div class="cover-title">LZXBI</div>
+            <div class="cover-sub">发现你对 lzx 的真实态度</div>
+            <div class="cover-badge"><strong>4</strong> 种人格结果</div>
+            <button class="btn-start" onclick="startQuiz()">开始测试</button>
+            <div class="cover-note">13 道题 · 纯属娱乐</div>
+        </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="screen" id="quiz">
+        <div class="quiz-header">
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="quiz-counter" id="counter">1 / 13</div>
+        </div>
+        <div class="quiz-body" id="quizBody"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="screen" id="result">
+        <div class="result-card" id="resultCard"></div>
+        <div style="margin-top: 24px; font-size: 12px; color: #bbb; text-align: center;">
+            测试结果仅供娱乐 · 不代表真实性格
+        </div>
+    </div>
+
+    <script>
+        let scores = { L: 0, X: 0, Z: 0, B: 0 };
+        let index = 0;
+
+        const questions = [
+            {q:"刷朋友圈时，突然看到 lzx 发了一张自拍，你的第一反应是？",
+             opts:[{k:"L", t:"秒赞+嫡长评：这集真妈妈"},{k:"X", t:"默默保存图片，但绝不点赞"},{k:"Z", t:"放大找瑕疵，然后冷笑一声"},{k:"B", t:"直接划走，跟我有啥关系"}]},
+            {q:"lzx 半夜给你发消息：在吗？聊聊？你会？",
+             opts:[{k:"L", t:"心跳加速，立刻回复：在！聊到天亮都行！"},{k:"X", t:"等两分钟再回，假装淡定：嗯，说。"},{k:"Z", t:"内心狂喜但只回一个：？"},{k:"B", t:"装死，第二天说：啊昨晚睡了"}]},
+            {q:"假如 lzx 送你一个礼物，你希望是？",
+             opts:[{k:"L", t:"手写的一封长信"},{k:"X", t:"第五人格虚妄"},{k:"Z", t:"一张写有'欠你一顿饭'的纸条"},{k:"B", t:"一个能离lzx远点的机票"}]},
+            {q:"有人说 lzx 坏话，你当场听到会？",
+             opts:[{k:"L", t:"直接开怼：你再说一遍试试？"},{k:"X", t:"心里记仇但表面微笑：每个人看法不同嘛"},{k:"Z", t:"偷偷录音，发给lzx邀功"},{k:"B", t:"加入讨论：其实我也觉得有点……"}]},
+            {q:"你梦到和 lzx 一起被困在电梯里，醒来后你会？",
+             opts:[{k:"L", t:"立刻记下梦境细节"},{k:"X", t:"回味一下，然后正常起床"},{k:"Z", t:"查周公解梦：梦见lzx意味着什么？"},{k:"B", t:"庆幸只是梦，太尴尬了"}]},
+            {q:"lzx 在群里发了一个冷笑话，没人回应。你会？",
+             opts:[{k:"L", t:"连发十个哈哈哈并复制笑话"},{k:"X", t:"私聊lzx：笑死了"},{k:"Z", t:"666"},{k:"B", t:"🤡"}]},
+            {q:"假如你有一个超能力，对 lzx 你会用？",
+             opts:[{k:"L", t:"读心术——想知道lzx怎么看我"},{k:"X", t:"隐身术——偷偷跟着lzx一整天"},{k:"Z", t:"时间暂停——把lzx朋友圈全点赞一遍"},{k:"B", t:"传送术——把lzx送到火星"}]},
+            {q:"lzx 突然关注了你所有社交账号，你会？",
+             opts:[{k:"L", t:"激动得发一条：我圆满了"},{k:"X", t:"立刻把以前发疯的内容设为私密"},{k:"Z", t:"反向关注lzx的小号"},{k:"B", t:"注销账号跑路"}]},
+            {q:"用三个字形容你对 lzx 的态度？",
+             opts:[{k:"L", t:"爱死楼自习"},{k:"X", t:"随便吧"},{k:"Z", t:"烦死了"},{k:"B", t:"谁啊你"}]},
+            {q:"你觉得自己对 lzx 的真实感情是？",
+             opts:[{k:"L", t:"痴迷上头，lzx是我生命的光"},{k:"X", t:"有点喜欢，但死要面子"},{k:"Z", t:"又爱又恨，主打一个别扭"},{k:"B", t:"毫无波澜，甚至想笑"}]},
+            {q:"如果lzx突然说'你可以当我一天宠物'，你会？",
+             opts:[{k:"L", t:"当场学狗叫：汪汪，主人！"},{k:"X", t:"问他：能当猫吗？狗太累。"},{k:"Z", t:"说：我当你爹行不行？"},{k:"B", t:"回：lzx是谁？你是不是认错人了？"}]},
+            {q:"lzx发了条语音，你点开发现是30秒的沉默，你会？",
+             opts:[{k:"L", t:"认真听完，然后回：呼吸声真好听。"},{k:"X", t:"回：你睡着了？我也爱你。"},{k:"Z", t:"回：你再发这种我报警了。"},{k:"B", t:"直接删掉聊天框"}]},
+            {q:"lzx不小心把水洒你身上了，你会？",
+             opts:[{k:"L", t:"说：没关系，这是爱的甘露。"},{k:"X", t:"说：你完了，请我喝一个月奶茶。"},{k:"Z", t:"把自己的水也泼回去：公平了。"},{k:"B", t:"默默擦干，换件衣服，当没发生过"}]}
+        ];
+
+        const results = {
+            L: { emoji: "🌸🌹", type: "L 型", title: "狂热亲卫队", pheromone: "信息素：玫瑰 · 蜜糖 · 上头", tag: "✨ 精神体 · 绵羊",
+                 desc: "你对 lzx 的感情浓度堪称核武器级别。上头、真诚、毫不掩饰——你是那种会认真记住 lzx 随口说过的每一句话的人。",
+                 quote: "爱，不是寻找一个完美的人，而是学会用完美的眼光，欣赏那个不完美的人。", author: "—— 《小王子》" },
+            X: { emoji: "🧊🐱", type: "X 型", title: "嘴硬王者", pheromone: "信息素：薄荷 · 淡香 · 克制", tag: "🫥 精神体 · 猫咪",
+                 desc: "你喜欢，但你绝对不会先说。口嫌体正直是你的人生信条。表面 0 分，内心 99 分，只是那 99 分会悄悄用“收藏图片”来表达。",
+                 quote: "有些人不善言辞，不代表他们没有感情，只是藏得比别人深一点。", author: "—— 佚名" },
+            Z: { emoji: "😈🌪️", type: "Z 型", title: "阴阳乐子人", pheromone: "信息素：浓烟 · 酸甜 · 混乱", tag: "⚡ 精神体 · 刺猬",
+                 desc: "又爱又恨，说不清楚。你对 lzx 的方式是反向表达——越是喜欢，越要使劲阴阳几句。其实你的内心早就剧透了答案。",
+                 quote: "最难受的不是爱而不得，是明明很在乎，还要装作一副无所谓的样子。", author: "—— 网络" },
+            B: { emoji: "🪨🌿", type: "B 型", title: "佛系路人", pheromone: "信息素：清水 · 空气 · 无味", tag: "🌀 精神体 · 石头",
+                 desc: "lzx 是谁？你表示不认识。你对 lzx 的感情浓度约等于对一块路边石头的感情——不讨厌，就是无感。这很好，这很健康。",
+                 quote: "不是所有的故事都需要你参演，有些戏，看个热闹就够了。", author: "—— 佚名" }
+        };
+
+        function startQuiz() {
+            document.getElementById('cover').classList.remove('active');
+            document.getElementById('quiz').classList.add('active');
+            index = 0;
+            scores = { L: 0, X: 0, Z: 0, B: 0 };
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[index];
+            const pct = Math.round((index / questions.length) * 100);
+
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('counter').textContent = (index + 1) + ' / ' + questions.length;
+
+            let optionsHTML = q.opts.map(o => 
+                `<button class="opt" onclick="choose('${o.k}', this)">${o.t}</button>`
+            ).join('');
+
+            document.getElementById('quizBody').innerHTML = `
+                <div class="question-block">
+                    <div class="q-num">${index + 1}</div>
+                    <div class="q-text">${q.q}</div>
+                    <div class="options-list">${optionsHTML}</div>
+                </div>
+            `;
+        }
+
+        function choose(type, el) {
+            el.classList.add('selected');
+            scores[type]++;
+
+            setTimeout(() => {
+                index++;
+                if (index < questions.length) {
+                    renderQuestion();
+                    document.getElementById('quizBody').scrollTop = 0;
+                } else {
+                    showResult();
+                }
+            }, 220);
+        }
+
+        function showResult() {
+            document.getElementById('quiz').classList.remove('active');
+            document.getElementById('result').classList.add('active');
+
+            const winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            const r = results[winner];
+            const total = Object.values(scores).reduce((a, b) => a + b, 0);
+            const pct = total === 0 ? 25 : Math.round((scores[winner] / total) * 100);
+
+            document.getElementById('resultCard').innerHTML = `
+                <div class="result-emoji">${r.emoji}</div>
+                <div class="result-label">你的身份</div>
+                <div class="result-type">${r.type}</div>
+                <div class="result-pheromone">${r.pheromone}</div>
+                <div class="result-tag">${r.tag}</div>
+                <div class="result-divider"></div>
+                <div class="result-desc">${r.desc}</div>
+                
+                <div style="margin-bottom:6px;">
+                    <div class="percent-label">浓度 ${pct}%</div>
+                    <div class="percent-bar"><div class="percent-fill" id="percentFill" style="width:0%"></div></div>
+                </div>
+
+                <div class="result-quote-block">
+                    <div class="result-quote">${r.quote}</div>
+                    <div class="result-quote-author">${r.author}</div>
+                </div>
+                
+                <button class="btn-retry" onclick="location.reload()">↺&nbsp;重新测试</button>
+            `;
+
+            setTimeout(() => {
+                const pf = document.getElementById('percentFill');
+                if (pf) pf.style.width = pct + '%';
+            }, 300);
+        }
+    </script>
+</body>
+</html>
